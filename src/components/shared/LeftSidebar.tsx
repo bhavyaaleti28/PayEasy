@@ -27,7 +27,7 @@ const LeftSidebar = () => {
     <nav className="leftsidebar">
       <div className="flex flex-col gap-11">
         <Link to="/" className="text-white font-bold text-lg flex items-center">
-          <span role="img" aria-label="Splitwise App" className="mr-1">
+          <span role="img" aria-label="PayEasy App" className="mr-1">
             <img
               width="35"
               height="35"
@@ -35,7 +35,7 @@ const LeftSidebar = () => {
               alt="cash-in-hand"
             />
           </span>
-          SpendShare
+          PayEasy
         </Link>
         <ul className="flex flex-col gap-4">
           {sidebarLinks.map((link: INavLink) => {
@@ -45,7 +45,7 @@ const LeftSidebar = () => {
               <li
                 key={link.label}
                 className={`leftsidebar-link group ${isActive && ""}`}
-                style={isActive ? { backgroundColor: "#1CC29F" } : {}}>
+                style={isActive ? { backgroundColor: "var(--accent)" } : {}}>
                 <NavLink
                   to={link.route}
                   className="flex gap-1 items-center p-1">

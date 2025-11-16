@@ -243,7 +243,7 @@ const AddExpense = () => {
                     </Button>
                     <Button
                       type="submit"
-                      style={{ backgroundColor: "#1CC29F" }}
+                      style={{ backgroundColor: "var(--accent)" }}
                       className="whitespace-nowrap"
                       disabled={isLoadingCreate}>
                       {isLoadingCreate && <Loader />}

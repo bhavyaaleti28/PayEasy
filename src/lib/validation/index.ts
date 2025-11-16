@@ -12,6 +12,7 @@ export const SignupValidation = z.object({
   password: z
     .string()
     .min(8, { message: "Password must be at least 8 characters." }),
+  upi: z.string().optional(),
 });
 
 export const SigninValidation = z.object({
@@ -29,6 +30,21 @@ export const ProfileValidation = z.object({
     .min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email(),
   bio: z.string(),
+});
+
+export const ResetPasswordValidation = z.object({
+  password: z.string().min(8, { message: "Password must be at least 8 characters." }),
+  confirm: z.string().min(8),
+}).refine((data) => data.password === data.confirm, {
+  message: "Passwords do not match",
+  path: ["confirm"],
+});
+
+export const ProfileEditValidation = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  username: z.string().min(2, { message: "Username must be at least 2 characters." }),
+  email: z.string().email({ message: "Invalid email address" }),
+  upi: z.string().optional(),
 });
 
 // ============================================================

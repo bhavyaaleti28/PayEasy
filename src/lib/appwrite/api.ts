@@ -17,12 +17,13 @@ export async function createUserAccount(user: INewUser) {
       email: newAccount.email,
       accountId: newAccount.$id,
       name: newAccount.name,
+      upi: user.upi,
     });
 
     return newUser;
   } catch (error) {
-    console.log(error);
-    return error;
+    console.error("createUserAccount error:", error);
+    throw error;
   }
 }
 
@@ -32,11 +33,14 @@ export async function saveUserToDB(user: {
   email: string;
   accountId: string;
   name: String;
+  upi?: string;
 }) {
   try {
     const uniqueID = ID.unique();
     console.log("Unique ID " + uniqueID);
 
+    // Create user document and grant write permission to the created account
+    // so the user can update their own profile later.
     const newUser = await databases.createDocument(
       appwriteConfig.databaseId,
       appwriteConfig.userCollectionId,
@@ -55,7 +59,8 @@ export async function saveUserToDB(user: {
     console.log(newUser.$id);
     return newUser;
   } catch (error) {
-    console.log(error);
+    console.error("saveUserToDB error:", error);
+    throw error;
   }
 }
 
@@ -66,7 +71,8 @@ export async function signInAccount(user: { email: string; password: string }) {
 
     return session;
   } catch (error) {
-    console.log(error);
+    console.error("signInAccount error:", error);
+    throw error;
   }
 }
 
@@ -121,6 +127,7 @@ export async function createGroup(group: INewGroup) {
         Creator: group.userId,
         groupName: group.groupName,
         Members: group.members,
+        creatorName: group.creatorName || "",
       }
     );
     return newPost;
@@ -205,6 +212,20 @@ export async function makeSettlement(settle: ISettlement) {
     return newSettlement;
   } catch (error) {
     console.log(error);
+  }
+}
+
+// ============================== GET ALL SETTLEMENTS
+export async function getAllSettlements() {
+  try {
+    const settlementData = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.TransactionCollectionId,
+      [Query.orderDesc("$createdAt")]
+    );
+    return settlementData;
+  } catch (error) {
+    console.error(error);
   }
 }
 
@@ -314,6 +335,47 @@ export async function getUserById(userId: string) {
   }
 }
 
+// ============================== PASSWORD RECOVERY
+export async function sendPasswordRecovery(email: string, redirectUrl: string) {
+  try {
+    const res = await account.createRecovery(email, redirectUrl);
+    return res;
+  } catch (error) {
+    // Don't reveal whether the email exists. Log the error for debugging
+    // and return a generic success response so the client always shows
+    // the same message to the user.
+    console.error("sendPasswordRecovery error:", error);
+    return { status: "ok" };
+  }
+}
+
+export async function resetPassword(userId: string, secret: string, password: string) {
+  try {
+    // Appwrite requires password and passwordAgain in older SDKs; pass twice
+    const res = await account.updateRecovery(userId, secret, password, password);
+    return res;
+  } catch (error) {
+    console.error("resetPassword error:", error);
+    throw error;
+  }
+}
+
+// ============================== UPDATE USER
+export async function updateUser(userId: string, updates: { [key: string]: any }) {
+  try {
+    const updated = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      userId,
+      updates
+    );
+    return updated;
+  } catch (error) {
+    console.error("Error updating user:", error);
+    throw error;
+  }
+}
+
 export async function getGroupById(groupId: string) {
   try {
     const group = await databases.getDocument(
@@ -329,13 +391,18 @@ export async function getGroupById(groupId: string) {
 }
 
 export async function getGroupsActivityById(groups: string[]) {
+  // Accept groups as array of objects ({ $id }) or array of string ids
+  if (!groups || groups.length === 0) return [];
   try {
     const groupActivities = await Promise.all(
       groups.map(async (group: any) => {
-        const groupData = await getGroupById(group.$id); // Wait for the response
-        if (groupData) {
+        const groupId = typeof group === "string" ? group : group?.$id || group;
+        if (!groupId) return [];
+        const groupData = await getGroupById(groupId); // Wait for the response
+        if (groupData && Array.isArray(groupData.activity)) {
+          // Attach the full group document to each activity (so ActivityCard can access groupName)
           groupData.activity.forEach((obj: { [key: string]: any }) => {
-            obj["Group"] = group; // Associate each activity with the group
+            obj["Group"] = groupData;
           });
           return groupData.activity;
         } else {
@@ -351,10 +418,13 @@ export async function getGroupsActivityById(groups: string[]) {
 }
 
 export async function getUserGroupsById(groups: string[]) {
+  if (!groups || groups.length === 0) return [];
   try {
     const groupActivities = await Promise.all(
       groups.map(async (group: any) => {
-        const groupData = await getGroupById(group.$id); // Wait for the response
+        const groupId = typeof group === "string" ? group : group?.$id || group;
+        if (!groupId) return [];
+        const groupData = await getGroupById(groupId); // Wait for the response
         if (groupData) {
           return groupData;
         } else {

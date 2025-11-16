@@ -34,7 +34,7 @@ const Home = () => {
           <h2 className="text-white text-2xl font-bold mb-6">
             Groups
             <button
-              style={{ backgroundColor: "#1CC29F" }}
+              style={{ backgroundColor: "var(--accent)" }}
               className="font-semibold bg-blue-500 text-white px-2 py-1 ml-2 rounded-full 
       hover:bg-blue-700 focus:outline-none focus:ring focus:border-blue-300 text-lg"
               onClick={() => navigate("/create-group")}>

@@ -55,7 +55,7 @@ export const getUniqueUserIdsFromGroups = (groups: any, userid: any) => {
   return uniqueUserDataArray;
 };
 
-export function simplifyTransactions(GroupData: any) {
+export function simplifyTransactions(GroupData: any, settlements: any[] = []) {
   const idMap = new Map();
   const userFriends: any[] = [];
 
@@ -141,6 +141,49 @@ export function simplifyTransactions(GroupData: any) {
       });
     }
   });
+
+  // Apply recorded settlements: settlements are docs with payerId, receiverId, Amount
+  // Map user IDs to names so we can adjust 'users' balances accordingly
+  if (settlements && settlements.length > 0) {
+    const idToName: { [key: string]: string } = {};
+    userFriends.forEach((f: any) => {
+      if (f && f.$id) idToName[f.$id] = f.name;
+    });
+
+    settlements.forEach((s) => {
+      try {
+        const payerId = s.payerId;
+        const receiverId = s.receiverId;
+        const amt = parseFloat(s.Amount || s.amount || 0) || 0;
+        const payerName = idToName[payerId];
+        const receiverName = idToName[receiverId];
+        if (payerName && receiverName && amt > 0) {
+          // payer paid receiver -> decrease payer's net owed, increase receiver's net
+          users[payerName] = (users[payerName] || 0) - amt;
+          users[receiverName] = (users[receiverName] || 0) + amt;
+        }
+      } catch (err) {
+        // ignore malformed settlement entries
+      }
+    });
+
+    // After applying settlements, recompute simplified transactions
+    const recomputed: { [key: string]: number } = { ...users };
+    const recomputedSimplified: { from: any; to: any; amount: number }[] = [];
+    Object.keys(recomputed).forEach((sender) => {
+      if (recomputed[sender] < 0) {
+        Object.keys(recomputed).forEach((receiver) => {
+          if (recomputed[receiver] > 0) {
+            const amount = Math.min(Math.abs(recomputed[sender]), recomputed[receiver]);
+            recomputedSimplified.push({ from: sender, to: receiver, amount });
+            recomputed[sender] += amount;
+            recomputed[receiver] -= amount;
+          }
+        });
+      }
+    });
+    return recomputedSimplified;
+  }
 
   return simplifiedTransactions;
 }

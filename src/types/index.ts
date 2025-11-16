@@ -23,6 +23,7 @@ export type INewGroup = {
   userId: string;
   groupName: string;
   members: string[];
+  creatorName?: string;
 };
 
 export type INewExpense = {
@@ -64,6 +65,7 @@ export type INewUser = {
   email: string;
   username: string;
   password: string;
+  upi?: string;
 };
 
 export type INewFriend = {

@@ -42,7 +42,7 @@ const ActivityImage = ({ Desc, Type }: UserCardProps) => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#3498db",
+        backgroundColor: "var(--secondary)",
         color: "#fff",
         fontWeight: "bold",
       }}>

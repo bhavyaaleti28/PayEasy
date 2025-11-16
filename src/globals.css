@@ -10,13 +10,21 @@
     @apply box-border list-none p-0 m-0 scroll-smooth;
   }
 
+  :root {
+    --bg-start: #071033; /* deep navy */
+    --bg-end: #0f172a; /* dark indigo */
+    --accent: #7C3AED; /* primary PayEasy purple */
+    --accent-hover: #6D28D9;
+    --secondary: #06B6D4; /* cyan/teal for highlights */
+    --muted: #5c5c7b;
+    --card-bg: rgba(17,24,39,0.6);
+  }
+
   body {
-    background: #485563;
+    background: var(--bg-end);
     /* fallback for old browsers */
-    background: -webkit-linear-gradient(to top, #29323c, #485563);
-    /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(to top, #29323c, #485563);
-    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background: -webkit-linear-gradient(to top, var(--bg-start), var(--bg-end));
+    background: linear-gradient(to top, var(--bg-start), var(--bg-end));
     color: white;
     min-height: 80vh;
     font-family: 'Inter', sans-serif;
@@ -234,7 +242,7 @@
   }
 
   .leftsidebar-link:hover {
-    background-color: #1CC29F;
+    background-color: var(--accent);
   }
 
   .leftsidebar-link {
@@ -253,7 +261,7 @@
   }
 
   .custom-form-container:hover {
-    background-color: #1CC29F;
+    background-color: var(--accent);
     /* Set the background color on hover */
   }
 
@@ -303,7 +311,7 @@
   }
 
   .shad-button_primary:hover {
-    background-color: #1CC29F;
+    background-color: var(--accent);
   }
 
   .shad-button_dark_4 {
@@ -323,7 +331,7 @@
 }
 
 .month-circle {
-  background-color: #3498db;
+  background-color: var(--secondary);
   /* You can choose your own color */
   border-radius: 50%;
   width: 40px;
@@ -362,7 +370,7 @@
   outline: none;
   z-index: 1;
   border: none;
-  background-color: #3498db;
+  background-color: var(--secondary);
   color: #fff;
   border-radius: 50%;
   font-size: 24px;
@@ -372,7 +380,7 @@
 }
 
 .blur-button:hover {
-  background-color: #2980b9;
+  background-color: var(--secondary);
 }
 
 .plus-sign {
@@ -394,7 +402,7 @@
 
 .extra-button {
   margin-top: 10px;
-  background-color: #2ecc71;
+  background-color: var(--accent);
   color: #fff;
   border: none;
   padding: 8px;
@@ -405,7 +413,7 @@
 }
 
 .extra-button:hover {
-  background-color: #27ae60;
+  background-color: var(--accent-hover);
 }
 
 /* ... (Previous styles) */
@@ -452,8 +460,8 @@
   transform: rotate(45deg);
   border-left: none;
   border-top: none;
-  border-right: 2px #1CC29F solid;
-  border-bottom: 2px #1CC29F solid;
+  border-right: 2px var(--accent) solid;
+  border-bottom: 2px var(--accent) solid;
 }
 
 .arrow:before {
@@ -464,8 +472,8 @@
   margin: -10px 0 0 -10px;
   border-left: none;
   border-top: none;
-  border-right: 1px #1CC29F solid;
-  border-bottom: 1px #1CC29F solid;
+  border-right: 1px var(--accent) solid;
+  border-bottom: 1px var(--accent) solid;
   animation-duration: 2s;
   animation-iteration-count: infinite;
   animation-name: arrow;

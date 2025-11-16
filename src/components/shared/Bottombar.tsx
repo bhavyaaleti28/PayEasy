@@ -16,7 +16,7 @@ const Bottombar = () => {
             className={`${
               isActive ? "rounded-[10px]" : ""
             } flex-center flex-col gap-1 p-2 transition`}
-            style={isActive ? { backgroundColor: "#1CC29F" } : {}}>
+            style={isActive ? { backgroundColor: "var(--accent)" } : {}}>
             <img
               src={link.imgURL}
               alt={link.label}

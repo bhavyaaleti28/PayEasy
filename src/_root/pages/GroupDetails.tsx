@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button, toast } from "@/components/ui";
 import { Loader } from "@/components/shared";
-import { useDeleteGroup, useGetGroupById } from "@/lib/react-query/queries";
+import { useDeleteGroup, useGetGroupById, useGetUserById } from "@/lib/react-query/queries";
 import { Models } from "appwrite";
 import GroupActivity from "@/components/shared/GroupActivity";
 import { simplifyTransactions } from "@/components/shared/Simplify";
+import { useGetAllSettlements } from "@/lib/react-query/queries";
 import { useUserContext } from "@/context/AuthContext";
 
 const GroupDetails = () => {
@@ -45,8 +46,10 @@ const GroupDetails = () => {
     }
   };
   const GroupDataId = [GroupData];
+  const { data: allSettlementsData } = useGetAllSettlements();
+  const settlements = allSettlementsData?.documents || [];
   const simplifiedData2: { from: any; to: any; amount: number }[] =
-    !isGroupDataLoading ? simplifyTransactions(GroupDataId) : [];
+    !isGroupDataLoading ? simplifyTransactions(GroupDataId, settlements) : [];
 
   const totalAmount = GroupData?.activity.reduce(
     (sum: number, activityItem: { Amout: string }) => {
@@ -75,6 +78,30 @@ const GroupDetails = () => {
   } else {
     document.body.classList.remove("active-modal");
   }
+   let creatorName = GroupData?.creatorName;
+    let creatorId = "";
+  if (GroupData?.Creator) {
+    if (typeof GroupData.Creator === "string") {
+      creatorId = GroupData.Creator;
+    } else if (typeof GroupData.Creator === "object" && GroupData.Creator.$id) {
+      creatorId = GroupData.Creator.$id;
+      // If Appwrite expands the relationship, use the name directly
+      if (GroupData.Creator.name) {
+        creatorName = GroupData.Creator.name;
+      }
+    }
+  }
+  const { data: creatorUser } = useGetUserById(creatorId || "");
+  // Fetch creator's name if only creator ID is present
+ 
+  // Debug log for full group data
+  if (typeof window !== "undefined") {
+    console.log("[GroupDetails] GroupData:", GroupData);
+  }
+  if (!creatorName && creatorUser) {
+    creatorName = creatorUser.name;
+  }
+
   return (
     <>
       <div className={`items-center flex-1 p-5 `}>
@@ -137,8 +164,11 @@ const GroupDetails = () => {
             <h2 className="text-lg font-bold mb-2  text-gray-400 inline ">
               Group :{" "}
               <span className="font-mono text-blue-400">
-                &nbsp;{GroupData.groupName}{" "}
+                &nbsp;{GroupData.groupName} {" "}
               </span>{" "}
+              <span className="text-sm text-gray-500 ml-2">
+                Creator: {creatorName || "Unknown"}
+              </span>
             </h2>
             <p className="font-bold text-gray-400">
               Members :&nbsp;&nbsp;
@@ -168,30 +198,7 @@ const GroupDetails = () => {
                 </p>
               </div>
 
-              <div className="mb-2 mt-1 text-sm">
-                <Button className="ml-2 p-2" onClick={toggleModal}>
-                  <img
-                    width="24"
-                    height="24"
-                    src="/assets/icons/debt3.png"
-                    alt="paytm"
-                  />{" "}
-                  Simplify Debt
-                </Button>
-                {/* <Button
-                  className="m-1"
-                  onClick={toggleModal2}
-                  disabled={isLoadingGroup}>
-                  <img
-                    width="24"
-                    height="24"
-                    src="https://img.icons8.com/color/48/delete-forever.png"
-                    alt="delete-forever"
-                  />{" "}
-                  {isLoadingGroup && <Loader />}
-                  {isLoadingGroup ? "Deleting..." : "Delete Group"}{" "}
-                </Button> */}
-              </div>
+              {/* Simplify Debt button removed as per user request */}
             </div>
 
             <div

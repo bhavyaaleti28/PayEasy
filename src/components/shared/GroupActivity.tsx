@@ -52,21 +52,7 @@ const GroupActivity = ({ activity }: UserCardProps) => {
     ) || false;
   const splitCount = activity.splitMember?.length ?? 0;
 
-  let amountMessage = "";
-
-  if (isPaidByCurrentUser && isCurrentUserInvolved) {
-    const individualAmount = parseFloat(activity.Amout) / splitCount;
-    const getback = parseFloat(activity.Amout) - individualAmount;
-    amountMessage = `You get back $${getback.toFixed(2)}`;
-  } else if (isPaidByCurrentUser && !isCurrentUserInvolved) {
-    const individualAmount = parseFloat(activity.Amout);
-    amountMessage = `You get back $${individualAmount.toFixed(2)}`;
-  } else if (!isPaidByCurrentUser && isCurrentUserInvolved) {
-    const individualAmount = parseFloat(activity.Amout) / splitCount;
-    amountMessage = `You owe $${individualAmount.toFixed(2)}`;
-  } else {
-    amountMessage = `Not involved`;
-  }
+  // Removed amountMessage logic as per user request
 
   return (
     <>
@@ -104,35 +90,25 @@ const GroupActivity = ({ activity }: UserCardProps) => {
           )}
         </span>{" "}
       </p>
-      <p
-        className={`${
-          isPaidByCurrentUser
-            ? "text-green-500 font-semibold"
-            : !isPaidByCurrentUser && isCurrentUserInvolved
-              ? "text-red font-semibold"
-              : "text-indigo-700 font-semibold"
-        }`}>
-        {amountMessage}
-        <Button
-          onClick={toggleModal}
-          style={{
-            backgroundColor:
-              isHovered || isLoadingExpense ? "#FF6347" : "#E53E3E",
-            color: "white", // Text color
-            padding: "8px 12px", // Equivalent to py-2 px-4
-            borderRadius: "8px", // Rounded corners
-            cursor: isLoadingExpense ? "not-allowed" : "pointer",
-            opacity: isLoadingExpense ? 0.6 : 1, // Reduce opacity if loading
-            transition: "background-color 0.3s", // Smooth background color transition
-            float: "right", // Position button on the left
-          }}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          disabled={isLoadingExpense}>
-          {isLoadingExpense && <Loader />}
-          {isLoadingExpense ? "Deleting..." : "Delete"}
-        </Button>
-      </p>
+      <Button
+        onClick={toggleModal}
+        style={{
+          backgroundColor:
+            isHovered || isLoadingExpense ? "#FF6347" : "#E53E3E",
+          color: "white",
+          padding: "8px 12px",
+          borderRadius: "8px",
+          cursor: isLoadingExpense ? "not-allowed" : "pointer",
+          opacity: isLoadingExpense ? 0.6 : 1,
+          transition: "background-color 0.3s",
+          float: "right",
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        disabled={isLoadingExpense}>
+        {isLoadingExpense && <Loader />}
+        {isLoadingExpense ? "Deleting..." : "Delete"}
+      </Button>
       {modal && (
         <div className="modal">
           <div onClick={handleDelete} className="overlay"></div>

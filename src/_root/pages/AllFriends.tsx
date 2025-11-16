@@ -4,6 +4,7 @@ import {
   useFriends,
   useGetGroupsActivityById,
   useGetUserGroupsById,
+  useGetAllSettlements,
 } from "@/lib/react-query/queries";
 import { useNavigate } from "react-router-dom";
 import {
@@ -53,8 +54,15 @@ const AllFriends = () => {
     setScrollTop(event.currentTarget.scrollTop);
   };
 
-  const simplifiedData2: { from: any; to: any; amount: number }[] =
-    !isUserGroupsLoading ? simplifyTransactions(userGroups) : [];
+ 
+
+  // Fetch all recorded settlements so simplify view can account for them
+  const { data: allSettlementsData } = useGetAllSettlements();
+  const settlements = allSettlementsData?.documents || [];
+
+  // recompute simplified data while considering settlements
+  const simplifiedDataWithSettlements: { from: any; to: any; amount: number }[] =
+    !isUserGroupsLoading ? simplifyTransactions(userGroups, settlements) : [];
 
   const uniqueUserIds = getUniqueUserIdsFromGroups(userGroups, user?.id);
   const uniqueUserIds2 = friendList?.documents[0]?.friendsId || [];
@@ -116,7 +124,7 @@ const AllFriends = () => {
             <div className="p-1">
               <h2 className="text-white text-2xl font-bold mb-6 inline p-1">
                 <button
-                  style={{ backgroundColor: "#1CC29F" }}
+                    style={{ backgroundColor: "var(--accent)" }}
                   className="font-semibold bg-blue-500 text-white px-4 py-1 ml-2 rounded-full 
       hover:bg-blue-700 focus:outline-none focus:ring focus:border-blue-300 text-lg"
                   onClick={() => navigate("/add-friend")}>
@@ -124,18 +132,7 @@ const AllFriends = () => {
                 </button>
               </h2>
             </div>
-            <div className="ml-1">
-              <Button className="m-1" onClick={toggleModal}>
-                <img
-                  className="mr-1 p-1"
-                  width="40"
-                  height="40"
-                  src="/assets/icons/debt3.png"
-                  alt="paytm"
-                />
-                Simplify Debts
-              </Button>
-            </div>
+            {/* Simplify Debts button removed from friends section as per user request */}
           </div>
 
           {isGroupsActivityLoading ||
@@ -178,60 +175,7 @@ const AllFriends = () => {
               </ul>
             </div>
           )}
-          {modal && userGroupsData && simplifiedData2.length > 0 && (
-            <div className="modal">
-              <div onClick={toggleModal} className="overlay"></div>
-
-              <div className="modal-content">
-                <div className="py-1">
-                  <div className="flex justify-between">
-                    <div className="py-2">
-                      <h2 className="text-neutral-200 text-2xl font-bold inline">
-                        Simplify Debts
-                      </h2>
-                    </div>
-
-                    <div className="ml-1">
-                      <button className="m-1" onClick={toggleModal}>
-                        <img
-                          className="mr-1 p-1"
-                          width="40"
-                          height="40"
-                          src="/assets/icons/close.png"
-                          alt="close"
-                        />
-                      </button>
-                    </div>
-                  </div>
-
-                  {simplifiedData2.map((item: any) => (
-                    <p key={`${item.from}-${item.to}`}>
-                      <span
-                        className={`text-lg font-bold inline ${
-                          user?.name === item.from
-                            ? "text-sky-300"
-                            : "text-neutral-400"
-                        }`}>
-                        "{item.from}"
-                      </span>{" "}
-                      owes{" "}
-                      <span
-                        className={`text-lg font-bold inline ${
-                          user?.name === item.to
-                            ? "text-sky-300"
-                            : "text-neutral-400"
-                        }`}>
-                        "{item.to}"{" "}
-                      </span>{" "}
-                      <span className="text-lg font-bold text-red">
-                        &#8377;&nbsp;{item.amount.toFixed(1)}
-                      </span>
-                    </p>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Simplify Debts modal removed from friends section as per user request */}
         </div>
       </div>
     </div>

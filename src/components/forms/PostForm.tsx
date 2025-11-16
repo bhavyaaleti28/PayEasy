@@ -55,6 +55,7 @@ const PostForm = ({ group, action }: PostFormProps) => {
       userId: user.id,
       groupName: value.groupname,
       members: [user.id],
+      creatorName: user.name,
     });
 
     if (!newGroup) {
@@ -97,7 +98,7 @@ const PostForm = ({ group, action }: PostFormProps) => {
           </Button>
           <Button
             type="submit"
-            style={{ backgroundColor: "#1CC29F" }}
+            style={{ backgroundColor: "var(--accent)" }}
             className="whitespace-nowrap"
             disabled={isLoadingCreate}>
             {isLoadingCreate && <Loader />}

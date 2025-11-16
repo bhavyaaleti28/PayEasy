@@ -7,6 +7,7 @@ import {
   signOutAccount,
   getUsers,
   getUserById,
+  updateUser,
   getGroups,
   getActivity,
   getFriends,
@@ -20,8 +21,11 @@ import {
   deleteGroup,
   getGroupsActivityById,
   getUserGroupsById,
+  sendPasswordRecovery,
+  resetPassword,
 } from "@/lib/appwrite/api";
 import { INewExpense, INewGroup, INewUser, ISettlement } from "@/types";
+import { getAllSettlements } from "@/lib/appwrite/api";
 import { useUserContext } from "@/context/AuthContext";
 
 // ============================================================
@@ -122,10 +126,25 @@ export const useMakeSettlement = () => {
   return useMutation({
     mutationFn: (settle: ISettlement) => makeSettlement(settle),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.GET_NEW_SETTLEMENT],
-      });
+      // Invalidate settlement queries so UI that reads settlements (useSettlmentById)
+      // refetches and reflects the new state.
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_NEW_SETTLEMENT] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_SETTLEMENT] });
+      // Also refresh core data that may depend on settlements
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CURRENT_USER] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_RECENT_ACTIVITY] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_GROUP_BY_ID] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_USER_GROUPS_BY_ID] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_GROUPS_BY_ID] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_FRIENDS] });
     },
+  });
+};
+
+export const useGetAllSettlements = () => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_NEW_SETTLEMENT],
+    queryFn: getAllSettlements,
   });
 };
 
@@ -210,5 +229,31 @@ export const useGetUserByUserName = (userName: string) => {
     queryKey: [QUERY_KEYS.GET_USER_BY_USER_NAME, userName],
     queryFn: () => geByUsername(userName),
     enabled: !!userName,
+  });
+};
+
+export const useSendPasswordRecovery = () => {
+  return useMutation({
+    mutationFn: ({ email, redirectUrl }: { email: string; redirectUrl: string }) =>
+      sendPasswordRecovery(email, redirectUrl),
+  });
+};
+
+export const useResetPassword = () => {
+  return useMutation({
+    mutationFn: ({ userId, secret, password }: { userId: string; secret: string; password: string }) =>
+      resetPassword(userId, secret, password),
+  });
+};
+
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, updates }: { userId: string; updates: any }) =>
+      updateUser(userId, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CURRENT_USER] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_FRIENDS] });
+    },
   });
 };

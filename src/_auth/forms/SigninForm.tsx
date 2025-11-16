@@ -33,31 +33,30 @@ const SigninForm = () => {
   });
 
   const handleSignin = async (user: z.infer<typeof SigninValidation>) => {
-    const session = await signInAccount(user);
+    try {
+      const session = await signInAccount(user);
+      if (!session) {
+        toast({ title: "Login failed. Please try again." });
+        return;
+      }
 
-    if (!session) {
-      toast({ title: "Login failed. Please try again." });
-      return;
-    }
+      const isLoggedIn = await checkAuthUser();
 
-    const isLoggedIn = await checkAuthUser();
-
-    if (isLoggedIn) {
-      toast({ title: "Login Successfully." });
-      form.reset();
-      navigate("/");
-    } else {
-      toast({ title: "Login failed. Please try again." });
+      if (isLoggedIn) {
+        toast({ title: "Login Successfully." });
+        form.reset();
+        navigate("/");
+      } else {
+        toast({ title: "Login failed. Please try again." });
+      }
+    } catch (err: any) {
+      console.error("Signin error:", err);
+      const message = err?.message || "Login failed. Please try again.";
+      toast({ title: message });
     }
   };
 
-  const handleDemoLogin = () => {
-    const demoCredentials = {
-      email: "pawan@gmail.com",
-      password: "pawan123",
-    };
-    handleSignin(demoCredentials);
-  };
+
 
   return (
     <Form {...form}>
@@ -65,21 +64,21 @@ const SigninForm = () => {
         <div className="text-white font-bold text-lg flex items-center justify-center">
           <span
             role="img"
-            aria-label="Splitwise App"
+            aria-label="PayEasy App"
             className="mr-3 p-2 mt-1 items-center">
             <img
               width="40"
               height="40"
-              src="/assets/images/split-logo.png"
-              alt="cash-in-hand"
+              src="/assets/images/logo.svg"
+              alt="PayEasy logo"
             />
           </span>
-          Splitwise
+          PayEasy
         </div>
       </div>
 
       <div className="sm:w-420 flex-center flex-col">
-        <h3 style={{ color: "#1CC29F" }} className="text-2xl font-bold">
+  <h3 style={{ color: "var(--accent)" }} className="text-2xl font-bold">
           Login
         </h3>
         {/* Add your login form components here */}
@@ -114,9 +113,11 @@ const SigninForm = () => {
             )}
           />
 
+
+
           <Button
             type="submit"
-            style={{ backgroundColor: "#1CC29F" }}
+            style={{ backgroundColor: "var(--accent)" }}
             className="">
             {isLoading || isUserLoading ? (
               <div className="flex-center gap-2">
@@ -127,17 +128,12 @@ const SigninForm = () => {
             )}
           </Button>
 
-          <Button
-            type="button"
-            style={{ backgroundColor: "#1C7FC2" }}
-            onClick={handleDemoLogin}>
-            Demo Login
-          </Button>
+
 
           <p className="text-small-regular text-light-2 text-center mt-2">
             Don&apos;t have an account?
             <Link
-              style={{ color: "#1CC29F" }}
+              style={{ color: "var(--accent)" }}
               to="/sign-up"
               className=" text-small-semibold ml-1">
               Sign up
@@ -148,5 +144,4 @@ const SigninForm = () => {
     </Form>
   );
 };
-
 export default SigninForm;

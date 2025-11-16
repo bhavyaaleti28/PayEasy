@@ -34,6 +34,7 @@ const SignupForm = () => {
       username: "",
       email: "",
       password: "",
+      upi: "",
     },
   });
 
@@ -44,11 +45,18 @@ const SignupForm = () => {
     useSignInAccount();
 
   // Handler
-  const handleSignup = async (user: z.infer<typeof SignupValidation>) => {
-    try {
-      const newUser = await createUserAccount(user);
+  // Extend type locally to include optional upi
+  type SignupData = z.infer<typeof SignupValidation> & { upi?: string };
 
-      console.log(newUser);
+  const handleSignup = async (user: SignupData) => {
+    try {
+      const newUser = await createUserAccount({
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        password: user.password,
+        upi: user.upi,
+      });
 
       if (!newUser) {
         toast({ title: "Sign up failed. Please try again." });
@@ -80,9 +88,10 @@ const SignupForm = () => {
         toast({ title: "Login failed. Please try again." });
         return;
       }
-    } catch (error) {
-      console.log("here");
-      console.log({ error });
+    } catch (err: any) {
+      console.error("Signup error:", err);
+      const message = err?.message || "Sign up failed. Please try again.";
+      toast({ title: message });
     }
   };
 
@@ -92,21 +101,21 @@ const SignupForm = () => {
         <div className="text-white font-bold text-lg flex items-center justify-center">
           <span
             role="img"
-            aria-label="Splitwise App"
+            aria-label="PayEasy App"
             className="mr-3 p-2 mt-1 items-center">
             <img
               width="40"
               height="40"
-              src="/assets/images/split-logo.png"
-              alt="cash-in-hand"
+              src="/assets/images/logo.svg"
+              alt="PayEasy logo"
             />
           </span>
-          Splitwise
+          PayEasy
         </div>
       </div>
 
       <div className="sm:w-420 flex-center flex-col pt-10">
-        <h3 style={{ color: "#1CC29F" }} className="text-2xl font-bold lg:mt-6">
+  <h3 style={{ color: "var(--accent)" }} className="text-2xl font-bold lg:mt-6">
           SignUp
         </h3>
         <form
@@ -168,9 +177,23 @@ const SignupForm = () => {
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="upi"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="shad-form_label">UPI ID (optional)</FormLabel>
+                <FormControl>
+                  <Input type="text" className="shad-input" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Button
             type="submit"
-            style={{ backgroundColor: "#1CC29F" }}
+            style={{ backgroundColor: "var(--accent)" }}
             className="">
             {isCreatingAccount || isSigningInUser || isUserLoading ? (
               <div className="flex-center gap-2">
@@ -184,7 +207,7 @@ const SignupForm = () => {
           <p className="text-small-regular text-light-2 text-center mt-2">
             Already have an account?
             <Link
-              style={{ color: "#1CC29F" }}
+              style={{ color: "var(--accent)" }}
               to="/sign-in"
               className=" text-small-semibold ml-1">
               Log in
